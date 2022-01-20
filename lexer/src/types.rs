@@ -58,6 +58,8 @@ where
 
 /// Use this if you want to get a quite common rule set with:
 /// Operators: +, -, *, /
+///
+///
 /// Brackets: (, )
 ///
 /// You can add more rules on returned builder:
@@ -69,9 +71,6 @@ where
 ///         TokenType::Operator(3, Associativity::Right, Box::new(|x, y| f32::powf(x, y))),
 ///    )
 ///    .compile();
-///
-///
-///
 /// ```
 pub fn get_default_builder<T>() -> TokenRulesBuilder<T>
 where
