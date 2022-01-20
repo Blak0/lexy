@@ -1,6 +1,6 @@
 use num::Num;
 use regex::Regex;
-use  std::fmt::{self, Debug};
+use std::fmt::{self, Debug};
 
 /// Precedence of a concrete operation - operations with higher values execute first
 pub type Precedence = u8;
@@ -160,10 +160,10 @@ where
     }
 }
 
-pub(crate) type ExpressionTokens<'rules, T> = Vec<ExpressionToken<'rules, T>>;
+pub type ExpressionTokens<'rules, T> = Vec<ExpressionToken<'rules, T>>;
 
 /// Single match containing start and stop byte index, corresponting slice and type of rule that detected it.
-pub(crate) struct FoundMatch<'text, 'rules, T>
+pub struct FoundMatch<'text, 'rules, T>
 where
     T: num::Num,
 {
