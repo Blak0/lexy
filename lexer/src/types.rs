@@ -56,6 +56,49 @@ where
     }
 }
 
+/// Use this if you want to get a quite common rule set with:
+/// Operators: +, -, *, /
+/// Brackets: (, )
+///
+/// You can add more rules on returned builder:
+/// ```
+/// use lexer::{get_default_builder, Associativity, TokenType};
+///
+/// let rules = get_default_builder::<f32>().add(
+///     r"\^",
+///         TokenType::Operator(3, Associativity::Right, Box::new(|x, y| f32::powf(x, y))),
+///    )
+///    .compile();
+///
+///
+///
+/// ```
+pub fn get_default_builder<T>() -> TokenRulesBuilder<T>
+where
+    T: num::Num,
+{
+    TokenRulesBuilder::<T>::new()
+        .add_default(TokenType::Argument(ArgumentType::Number))
+        .add(
+            r"\+",
+            TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x + y)),
+        )
+        .add(
+            r"-",
+            TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x - y)),
+        )
+        .add(
+            r"\*",
+            TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x * y)),
+        )
+        .add(
+            r"/",
+            TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x / y)),
+        )
+        .add_default(TokenType::LeftBracket)
+        .add_default(TokenType::RightBracket)
+}
+
 #[derive(Debug)]
 pub struct TokenRulesBuilder<T: Num> {
     rules: Vec<TokenRule<T>>,
