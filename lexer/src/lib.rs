@@ -10,5 +10,6 @@ pub use types::Associativity;
 pub use types::TokenRules;
 pub use types::TokenRulesBuilder;
 pub use types::TokenType;
+pub use types::ArgumentType;
 pub use types::{ExpressionToken, ExpressionTokens};
 
