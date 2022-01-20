@@ -1,2 +1,1 @@
-#[cfg(test)]
-mod tests {}
+mod calculate_test;

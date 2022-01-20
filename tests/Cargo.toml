@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 lexer = { path = "../lexer" }
+[dev-dependencies]
+approx = "0.5.0"
