@@ -32,8 +32,14 @@ pub enum TokenType<T>
 where
     T: Num,
 {
-    Argument(ArgumentType),
-    Operator(Precedence, Associativity, Callback<T>),
+    Argument {
+        kind: ArgumentType,
+    },
+    Operator {
+        precedence: Precedence,
+        associativity: Associativity,
+        callback: Callback<T>,
+    },
     LeftBracket,
     RightBracket,
 }
@@ -44,8 +50,12 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Argument(arg_type) => f.debug_tuple("Argument").field(arg_type).finish(),
-            Self::Operator(precedence, associativity, _) => f
+            Self::Argument { kind } => f.debug_tuple("Argument").field(kind).finish(),
+            Self::Operator {
+                precedence,
+                associativity,
+                ..
+            } => f
                 .debug_tuple("Operator")
                 .field(precedence)
                 .field(associativity)
@@ -57,10 +67,8 @@ where
 }
 
 /// Use this if you want to get a quite common rule set with:
-/// Operators: +, -, *, /
+/// Operators: +, -, *, / and round brackets ()
 ///
-///
-/// Brackets: (, )
 ///
 /// You can add more rules on returned builder:
 /// ```
@@ -68,31 +76,51 @@ where
 ///
 /// let rules = get_default_builder::<f32>().add(
 ///     r"\^",
-///         TokenType::Operator(3, Associativity::Right, Box::new(|x, y| f32::powf(x, y))),
-///    )
-///    .compile();
+///     TokenType::Operator {
+///     precedence: 3,
+///     associativity: Associativity::Right,
+///     callback: Box::new(|x, y| f32::powf(x, y)),
+/// }).compile();
 /// ```
 pub fn get_default_builder<T>() -> TokenRulesBuilder<T>
 where
     T: num::Num,
 {
     TokenRulesBuilder::<T>::new()
-        .add_default(TokenType::Argument(ArgumentType::Number))
+        .add_default(TokenType::Argument {
+            kind: ArgumentType::Number,
+        })
         .add(
             r"\+",
-            TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x + y)),
+            TokenType::Operator {
+                precedence: 1,
+                associativity: Associativity::Left,
+                callback: Box::new(|x, y| x + y),
+            },
         )
         .add(
-            r"-",
-            TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x - y)),
+            r"\-",
+            TokenType::Operator {
+                precedence: 1,
+                associativity: Associativity::Left,
+                callback: Box::new(|x, y| x - y),
+            },
         )
         .add(
             r"\*",
-            TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x * y)),
+            TokenType::Operator {
+                precedence: 2,
+                associativity: Associativity::Left,
+                callback: Box::new(|x, y| x * y),
+            },
         )
         .add(
             r"/",
-            TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x / y)),
+            TokenType::Operator {
+                precedence: 2,
+                associativity: Associativity::Left,
+                callback: Box::new(|x, y| x / y),
+            },
         )
         .add_default(TokenType::LeftBracket)
         .add_default(TokenType::RightBracket)
@@ -128,10 +156,10 @@ where
             TokenType::RightBracket => {
                 Regex::new(r"\)").expect("Compilation of default right bracket has failed")
             }
-            TokenType::Operator(_, _, _) => {
+            TokenType::Operator { .. } => {
                 panic!("Default operators aren't supported!")
             }
-            TokenType::Argument(ref arg_type) => match arg_type {
+            TokenType::Argument { ref kind } => match kind {
                 ArgumentType::Number => {
                     Regex::new(r"\d+\.?(\d?)+").expect("Compilation of numeric argument has failed")
                 }
@@ -153,10 +181,10 @@ where
 
 fn compile_regex_for_token_rule<T: num::Num>(match_rule: &str, token: &TokenType<T>) -> Regex {
     match token {
-        TokenType::Argument(_) => {
+        TokenType::Argument { .. } => {
             Regex::new(match_rule).expect("Compilation of number regex has failed")
         }
-        TokenType::Operator(_, _, _) => Regex::new(match_rule)
+        TokenType::Operator { .. } => Regex::new(match_rule)
             .expect(format!("Compilation of regex with rule: {} has failed.", match_rule).as_str()),
         TokenType::LeftBracket | TokenType::RightBracket => Regex::new(match_rule).expect(
             format!(

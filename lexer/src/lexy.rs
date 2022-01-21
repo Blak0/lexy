@@ -123,10 +123,12 @@ where
     <T as FromStr>::Err: std::fmt::Debug,
 {
     match token_type {
-        TokenType::Argument(_) => ExpressionToken::Argument(T::from_str(slice).unwrap()),
-        TokenType::Operator(precedence, associativity, lambda) => {
-            ExpressionToken::Operator(*precedence, associativity, lambda)
-        }
+        TokenType::Argument { .. } => ExpressionToken::Argument(T::from_str(slice).unwrap()),
+        TokenType::Operator {
+            precedence,
+            associativity,
+            callback,
+        } => ExpressionToken::Operator(*precedence, associativity, callback),
         TokenType::LeftBracket => ExpressionToken::LeftBracket,
         TokenType::RightBracket => ExpressionToken::RightBracket,
     }

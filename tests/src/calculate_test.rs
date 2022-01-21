@@ -2,27 +2,41 @@
 mod tests {
     use lexer::{calculate, ArgumentType, Associativity, TokenRules, TokenRulesBuilder, TokenType};
     fn get_rules() -> TokenRules<f32> {
-        TokenRulesBuilder::new()
-            .add_default(TokenType::Argument(ArgumentType::Number))
+        TokenRulesBuilder::<f32>::new()
+            .add_default(TokenType::Argument {
+                kind: ArgumentType::Number,
+            })
             .add(
                 r"\+",
-                TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x + y)),
+                TokenType::Operator {
+                    precedence: 1,
+                    associativity: Associativity::Left,
+                    callback: Box::new(|x, y| x + y),
+                },
             )
             .add(
-                r"-",
-                TokenType::Operator(1, Associativity::Left, Box::new(|x, y| x - y)),
+                r"\-",
+                TokenType::Operator {
+                    precedence: 1,
+                    associativity: Associativity::Left,
+                    callback: Box::new(|x, y| x - y),
+                },
             )
             .add(
                 r"\*",
-                TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x * y)),
+                TokenType::Operator {
+                    precedence: 2,
+                    associativity: Associativity::Left,
+                    callback: Box::new(|x, y| x * y),
+                },
             )
             .add(
                 r"/",
-                TokenType::Operator(2, Associativity::Left, Box::new(|x, y| x / y)),
-            )
-            .add(
-                r"\^",
-                TokenType::Operator(3, Associativity::Right, Box::new(|x, y| f32::powf(x, y))),
+                TokenType::Operator {
+                    precedence: 2,
+                    associativity: Associativity::Left,
+                    callback: Box::new(|x, y| x / y),
+                },
             )
             .add_default(TokenType::LeftBracket)
             .add_default(TokenType::RightBracket)
